@@ -17,7 +17,7 @@ public class ProjectSummary {
     }
 
     /**
-     * Verifies whether none of the defined modules is empty
+     * Verifies whether none of the defined modules is empty.
      *
      * @return the object on which the method was called to enable chaining
      * @throws AssertionError When any of the modules is empty.
@@ -38,7 +38,8 @@ public class ProjectSummary {
         Optional<ModulePartialSummary> biggestModule = analyzedModules.values().stream().max(comparing);
         biggestModule.ifPresent(module -> {
             if (module.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f.".formatted(module.module(), module.relativeModuleSize(), threshold));
+                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f."
+                        .formatted(module.module(), module.relativeModuleSize(), threshold));
             }
         });
         return this;
@@ -50,7 +51,8 @@ public class ProjectSummary {
         }
         Optional.ofNullable(analyzedModules.get(module)).ifPresent(it -> {
             if (it.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f.".formatted(it.module(), it.relativeModuleSize(), threshold));
+                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f."
+                        .formatted(it.module(), it.relativeModuleSize(), threshold));
             }
         });
         return this;
@@ -59,7 +61,8 @@ public class ProjectSummary {
     public ProjectSummary verifyUndefinedModuleNumberOfFilesIsSmallerThan(int threshold) {
         Optional.ofNullable(analyzedModules.get(ModuleSizeCalculator.UNDEFINED_MODULE_NAME)).ifPresent(it -> {
             if (it.numberOfFiles() > threshold) {
-                throw new AssertionError("Number of files in undefined module is %s. Max available count is %s.".formatted(it.numberOfFiles(), threshold));
+                throw new AssertionError("Number of files in undefined module is %s. Max available count is %s."
+                        .formatted(it.numberOfFiles(), threshold));
             }
         });
         return this;
@@ -85,14 +88,14 @@ public class ProjectSummary {
     }
 
     /**
-     * @return total number of files in the project
+     * @return total number of files in the project.
      */
     public int numberOfFiles() {
         return analyzedModules.values().stream().mapToInt(it -> it.numberOfFiles()).sum();
     }
 
     /**
-     * @return total number of lines of code in the project
+     * @return total number of lines of code in the project.
      */
     public int linesOfCode() {
         return analyzedModules.values().stream().mapToInt(it -> it.moduleLinesOfCode()).sum();
