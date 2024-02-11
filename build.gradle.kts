@@ -1,6 +1,7 @@
 plugins {
     id("java")
     checkstyle
+    jacoco
 }
 
 group = "pl.tfij"
@@ -19,7 +20,24 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// checkstyle
 checkstyle {
     toolVersion = "10.13.0"
     sourceSets = listOf(project.sourceSets.main.orNull)
+}
+
+// jacoco test coverage
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+    }
 }
