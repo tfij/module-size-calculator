@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 class ModuleSizeCalculatorTest {
 
     @Test
+    @DisplayName("Should analyze all files")
     void shouldAnalyzeTestProject() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -18,13 +19,31 @@ class ModuleSizeCalculatorTest {
                 .analyze();
 
         Assertions.assertEquals(7, projectSummary.modulesSummary().size());
+        Assertions.assertEquals(22, projectSummary.numberOfFiles());
+        Assertions.assertEquals(1028, projectSummary.linesOfCode());
+    }
+
+    @Test
+    @DisplayName("Should analyze java files")
+    void shouldAnalyzeJavaFiles() {
+        ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
+                .withModule("pl.tfij.commons")
+                .withModule("pl.tfij.orders")
+                .withModule("pl.tfij.payments")
+                .withModule("pl.tfij.products")
+                .withModule("pl.tfij.shipping")
+                .withModule("pl.tfij.users")
+                .include("java")
+                .analyze();
+
+        Assertions.assertEquals(7, projectSummary.modulesSummary().size());
         Assertions.assertEquals(20, projectSummary.numberOfFiles());
         Assertions.assertEquals(968, projectSummary.linesOfCode());
     }
 
     @Test
-    @DisplayName("Should not throw AssertionError when call verifyNoEmptyModules() and no module is empty")
-    void noErrorForVerifyNoEmptyModules() {
+    @DisplayName("Should analyze java and csv files")
+    void shouldAnalyzeJavaAndCsvFiles() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
                 .withModule("pl.tfij.orders")
@@ -32,26 +51,30 @@ class ModuleSizeCalculatorTest {
                 .withModule("pl.tfij.products")
                 .withModule("pl.tfij.shipping")
                 .withModule("pl.tfij.users")
+                .include("java", "csv")
                 .analyze();
 
-        Assertions.assertDoesNotThrow(() -> projectSummary.verifyNoEmptyModules());
+        Assertions.assertEquals(7, projectSummary.modulesSummary().size());
+        Assertions.assertEquals(21, projectSummary.numberOfFiles());
+        Assertions.assertEquals(1013, projectSummary.linesOfCode());
     }
 
     @Test
-    @DisplayName("Should throw AssertionError when call verifyNoEmptyModules() and a module is empty")
-    void assertionErrorForVerifyNoEmptyModules() {
+    @DisplayName("Should analyze java, csv and no-extension files")
+    void shouldAnalyzeJavaCsvNoExtensionFiles() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
                 .withModule("pl.tfij.orders")
                 .withModule("pl.tfij.payments")
                 .withModule("pl.tfij.products")
                 .withModule("pl.tfij.shipping")
-                .withModule("pl.tfij.notification")
                 .withModule("pl.tfij.users")
+                .include("java", "csv", "")
                 .analyze();
 
-        AssertionError error = Assertions.assertThrows(AssertionError.class, () -> projectSummary.verifyNoEmptyModules());
-        Assertions.assertEquals("Module `pl.tfij.notification` is empty.", error.getMessage());
+        Assertions.assertEquals(7, projectSummary.modulesSummary().size());
+        Assertions.assertEquals(22, projectSummary.numberOfFiles());
+        Assertions.assertEquals(1028, projectSummary.linesOfCode());
     }
 
 }

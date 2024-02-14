@@ -1,0 +1,45 @@
+ID,Name,Description,Price,Stock Quantity,Category
+1,Black Cotton T-shirt,"T-shirt made from high-quality cotton, black color",29.99,100,Apparel
+2,Men's Regular Fit Jeans,"Men's regular fit jeans, blue color",49.99,50,Apparel
+3,Red Evening Dress,"Elegant red evening dress",79.99,20,Apparel
+4,Black Patent Leather High Heels,"Women's high heels made from patent leather, black color",59.99,30,Footwear
+5,White Men's Sports Shoes,"Men's sports shoes, white color",69.99,40,Footwear
+6,Brown Leather Wallet,"Men's wallet made from genuine leather, brown color",39.99,25,Accessories
+7,Sporty Men's Watch,"Waterproof men's watch, black color",99.99,15,Accessories
+8,Samsung Galaxy S20 Smartphone,"Smartphone from the latest Galaxy series, black color",899.99,10,Electronics
+9,Dell XPS 15 Laptop,"High-performance laptop, 15-inch screen",1499.99,5,Electronics
+10,Apple AirPods Pro Wireless Earbuds,"Wireless earbuds with noise cancellation feature",249.99,20,Electronics
+11,Unisex Hooded Sweatshirt,"Comfortable hooded sweatshirt, grey color",39.99,60,Apparel
+12,Men's Jogger Pants,"Men's jogger pants, navy blue color",34.99,45,Apparel
+13,Men's Plaid Shirt,"Men's plaid shirt, red-white color",29.99,35,Apparel
+14,Women's Beach Sandals,"Comfortable women's beach sandals, pink color",19.99,75,Footwear
+15,Men's Rubber Flip Flops,"Men's rubber flip flops, black color",14.99,80,Footwear
+16,Round Beach Bag,"Round beach bag with striped pattern",24.99,55,Accessories
+17,Polaroid Sunglasses,"Polarized sunglasses, brown color",49.99,30,Accessories
+18,Xiaomi 10000 mAh Powerbank,"Black 10000 mAh powerbank by Xiaomi",29.99,25,Electronics
+19,JBL Charge 4 Bluetooth Speaker,"Waterproof Bluetooth speaker, blue color",129.99,10,Electronics
+20,Huawei Watch GT 2 Smartwatch,"Smartwatch with activity tracking, black color",199.99,15,Electronics
+21,Black Cocktail Dress with Ruffles,"Elegant black cocktail dress with ruffles",69.99,25,Apparel
+22,Long Denim Skirt,"Long denim skirt, blue color",44.99,40,Apparel
+23,Unisex Padded Jacket with Hood,"Green unisex padded jacket with detachable hood",79.99,20,Apparel
+24,Men's Red Swim Shorts,"Men's red swim shorts",19.99,65,Apparel
+25,Suede Women's Ballerina Flats,"Women's suede ballerina flats, brown color",29.99,50,Footwear
+26,Men's Winter Boots,"Men's winter boots, insulated, black color",59.99,30,Footwear
+27,30L Tourist Backpack,"Grey 30L tourist backpack",39.99,40,Accessories
+28,Men's Prescription Glasses,"Black men's prescription glasses",79.99,15,Accessories
+29,50-Piece Tool Set,"Tool set in a case, 50 pieces",69.99,8,Accessories
+30,Lenovo IdeaPad 5 Laptop,"Laptop with Intel Core i5 processor, 14-inch screen",899.99,12,Electronics
+31,Xiaomi Redmi Note 10 Smartphone,"Smartphone with AMOLED display, white color",299.99,18,Electronics
+32,Samsung Galaxy Watch Active 2 Smartwatch,"Waterproof smartwatch with heart rate monitor, black color",249.99,20,Electronics
+33,Sequin Evening Dress,"Sequin embellished evening dress, gold color",89.99,10,Apparel
+34,Men's Slim Fit Chinos,"Men's slim fit chinos, khaki color",49.99,30,Apparel
+35,Oversized Women's T-Shirt with Print,"Loose women's t-shirt with print, pink color",24.99,50,Apparel
+36,Women's Puffer Coat,"Women's puffer coat, black color",129.99,15,Apparel
+37,Men's Trekking Shoes,"Men's trekking shoes, waterproof, grey color",79.99,25,Footwear
+38,Elegant Men's Moccasins,"Elegant men's moccasins, leather, brown color",59.99,20,Footwear
+39,Unisex Sports Socks,"Unisex sports socks, pack of 3, black color",9.99,100,Footwear
+40,Grey Wool Scarf,"Grey wool scarf, soft and warm",14.99,70,Accessories
+41,Women's Decorative Earrings,"Women's decorative earrings, silver, embellished with cubic zirconia",19.99,45,Accessories
+42,Ray-Ban Aviator Sunglasses,"Ray-Ban Aviator sunglasses, gold color",149.99,25,Accessories
+43,Anker PowerCore 20000 mAh Powerbank,"Black 20000 mAh powerbank by Anker",49.99,20,Electronics
+44,Samsung Galaxy Tab S7 Tablet,"Tablet with 11-inch screen, includes S Pen stylus",599.99,10,Electronics
