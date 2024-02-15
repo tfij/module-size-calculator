@@ -26,7 +26,7 @@ public class ModuleSizeCalculator {
      */
     private final Set<String> includeOnlyFilesWithExtension;
 
-    public ModuleSizeCalculator(List<String> modules, String rootDir, Set<String> includeOnlyFilesWithExtension) {
+    ModuleSizeCalculator(List<String> modules, String rootDir, Set<String> includeOnlyFilesWithExtension) {
         this.includeOnlyFilesWithExtension = includeOnlyFilesWithExtension;
         this.modules = modules.stream()
                 .map(it -> new Module(it, rootDir + "/" + it.replaceAll("\\.", "/")))
@@ -34,6 +34,12 @@ public class ModuleSizeCalculator {
         this.rootDir = rootDir;
     }
 
+    /**
+     * Creates a new ModuleSizeCalculatorBuilder instance for a project located at the specified root directory.
+     *
+     * @param rootDir The root directory of the project.
+     * @return A ModuleSizeCalculatorBuilder instance initialized with the project's root directory.
+     */
     public static ModuleSizeCalculatorBuilder project(String rootDir) {
         return new ModuleSizeCalculatorBuilder(rootDir);
     }
@@ -103,10 +109,16 @@ public class ModuleSizeCalculator {
         private final ArrayList<String> modules = new ArrayList<>();
         private final Set<String> includeOnlyFilesWithExtension = new HashSet<>();
 
-        public ModuleSizeCalculatorBuilder(String rootDir) {
+        ModuleSizeCalculatorBuilder(String rootDir) {
             this.rootDir = rootDir;
         }
 
+        /**
+         * Adds a module package to the list of modules for analysis.
+         *
+         * @param modulePackage The package of the module to be added.
+         * @return The ModuleSizeCalculatorBuilder instance to allow method chaining.
+         */
         public ModuleSizeCalculatorBuilder withModule(String modulePackage) {
             modules.add(modulePackage);
             return this;
@@ -116,6 +128,7 @@ public class ModuleSizeCalculator {
          * Set the set of file extensions that should be included in the analysis.
          * If nothing is set, all files will be analyzed. If you want to analyze files
          * without extensions, add an empty string to the list.
+         *
          * @param fileExtension Set the set of file extensions that should be included in the analysis
          * @return The instance of the builder class on which the method was called.
          */
@@ -124,6 +137,11 @@ public class ModuleSizeCalculator {
             return this;
         }
 
+        /**
+         * Analyzes the modules using the provided configuration and returns a summary of the project.
+         *
+         * @return A ProjectSummary instance containing the summary of the analyzed project.
+         */
         public ProjectSummary analyze() {
             ModuleSizeCalculator moduleSizeCalculator = new ModuleSizeCalculator(modules, rootDir, includeOnlyFilesWithExtension);
             Map<String, ModulePartialSummary> analyzedModules = moduleSizeCalculator.calculate();
