@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class ModuleSizeCalculator {
     public static final String UNDEFINED_MODULE_NAME = "undefined";
-    private final List<Module> modules;
+    private final List<FileInModule.Module> modules;
     private final String rootDir;
 
     /**
@@ -29,7 +29,7 @@ public class ModuleSizeCalculator {
     ModuleSizeCalculator(List<String> modules, String rootDir, Set<String> includeOnlyFilesWithExtension) {
         this.includeOnlyFilesWithExtension = includeOnlyFilesWithExtension;
         this.modules = modules.stream()
-                .map(it -> new Module(it, rootDir + "/" + it.replaceAll("\\.", "/")))
+                .map(it -> new FileInModule.Module(it, rootDir + "/" + it.replaceAll("\\.", "/")))
                 .toList();
         this.rootDir = rootDir;
     }
@@ -77,7 +77,7 @@ public class ModuleSizeCalculator {
         return fileName.substring(dotIndex + 1);
     }
 
-    private Optional<Module> matchModule(Path file, List<Module> modules) {
+    private Optional<FileInModule.Module> matchModule(Path file, List<FileInModule.Module> modules) {
         return modules.stream().filter(moduleDir -> file.startsWith(moduleDir.moduleDir())).findFirst();
     }
 
