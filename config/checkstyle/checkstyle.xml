@@ -77,6 +77,7 @@
         <module name="JavadocType"/>
         <module name="JavadocStyle"/>
         <module name="InvalidJavadocPosition"/>
+        <module name="MissingJavadocMethod"/>
 
         <!-- Checks for Naming Conventions.                  -->
         <!-- See http://checkstyle.sf.net/config_naming.html -->

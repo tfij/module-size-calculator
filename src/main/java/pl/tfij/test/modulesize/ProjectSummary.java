@@ -19,7 +19,7 @@ public class ProjectSummary {
     /**
      * Verifies whether none of the defined modules is empty.
      *
-     * @return the object on which the method was called to enable chaining
+     * @return The ProjectSummary instance to allow method chaining.
      * @throws AssertionError When any of the modules is empty.
      */
     public ProjectSummary verifyNoEmptyModules() {
@@ -30,6 +30,14 @@ public class ProjectSummary {
         return this;
     }
 
+    /**
+     * Verifies that the relative size of each module is smaller than the given threshold.
+     *
+     * @param threshold The maximum relative size allowed for each module. Must be a positive number in the range (0, 1].
+     * @return The ProjectSummary instance to allow method chaining.
+     * @throws IllegalArgumentException if the threshold is not within the valid range.
+     * @throws AssertionError           if any module's relative size exceeds the threshold.
+     */
     public ProjectSummary verifyEachModuleRelativeSizeIsSmallerThan(double threshold) {
         if (threshold <= 0 || threshold > 1) {
             throw new IllegalArgumentException("Threshold must be positive number in range (0, 1]. Given value is %s.".formatted(threshold));
@@ -38,36 +46,57 @@ public class ProjectSummary {
         Optional<ModulePartialSummary> biggestModule = analyzedModules.values().stream().max(comparing);
         biggestModule.ifPresent(module -> {
             if (module.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f."
+                throw new AssertionError("Module `%s` relative size is %.3f. Max allowed size is %.3f."
                         .formatted(module.module(), module.relativeModuleSize(), threshold));
             }
         });
         return this;
     }
 
+    /**
+     * Verifies that the relative size of the specified module is smaller than the given threshold.
+     *
+     * @param module    The name of the module to verify.
+     * @param threshold The maximum relative size allowed for the module.
+     * @return The ProjectSummary instance to allow method chaining.
+     * @throws IllegalArgumentException if the specified module is not defined.
+     * @throws AssertionError           if the relative size of the module exceeds the threshold.
+     */
     public ProjectSummary verifyModuleIsSmallerThan(String module, double threshold) {
         if (!definedModules.contains(module)) {
             throw new IllegalArgumentException("Module `%s` was not defined.".formatted(module));
         }
         Optional.ofNullable(analyzedModules.get(module)).ifPresent(it -> {
             if (it.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max available size is %.3f."
+                throw new AssertionError("Module `%s` relative size is %.3f. Max allowed size is %.3f."
                         .formatted(it.module(), it.relativeModuleSize(), threshold));
             }
         });
         return this;
     }
 
+    /**
+     * Verifies that the number of files in the undefined module is smaller than the specified threshold.
+     *
+     * @param threshold The maximum number of files allowed in the undefined module.
+     * @return The ProjectSummary instance to allow method chaining.
+     * @throws AssertionError if the number of files in the undefined module exceeds the threshold.
+     */
     public ProjectSummary verifyUndefinedModuleNumberOfFilesIsSmallerThan(int threshold) {
         Optional.ofNullable(analyzedModules.get(ModuleSizeCalculator.UNDEFINED_MODULE_NAME)).ifPresent(it -> {
             if (it.numberOfFiles() > threshold) {
-                throw new AssertionError("Number of files in undefined module is %s. Max available count is %s."
+                throw new AssertionError("Number of files in undefined module is %s. Max allowed count is %s."
                         .formatted(it.numberOfFiles(), threshold));
             }
         });
         return this;
     }
 
+    /**
+     * Generates a Mermaid pie chart representation based on analyzed modules.
+     *
+     * @return A string representing the Mermaid pie chart.
+     */
     public String toMermaidPieChart() {
         String pieChartHeader = "pie showData title Modules size\n";
         String pieChartData = analyzedModules.values().stream()
@@ -77,9 +106,9 @@ public class ProjectSummary {
     }
 
     /**
-     * The list contains summaries for all defined modules. This summary can be used for generating custom reports, assertions, etc.
+     * Generates a summary of the analyzed modules.
      *
-     * @return list of analysed modules
+     * @return A list containing ModuleSummary objects representing each analyzed module.
      */
     public List<ModuleSummary> modulesSummary() {
         return analyzedModules.values().stream()
