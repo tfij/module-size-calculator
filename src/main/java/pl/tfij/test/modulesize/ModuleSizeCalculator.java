@@ -45,7 +45,7 @@ public class ModuleSizeCalculator {
     }
 
     private Map<String, ModulePartialSummary> calculate() {
-        List<FileInModule> pathStream = getAllFilesInDirectory(Paths.get(rootDir))
+        List<FileInModule> pathStream = getAllFilesInDirectory(Paths.get(rootDir)).stream()
                 .filter(this::includeFile)
                 .map(it -> new FileInModule(
                         it.toString(),
@@ -81,12 +81,11 @@ public class ModuleSizeCalculator {
         return modules.stream().filter(moduleDir -> file.startsWith(moduleDir.moduleDir())).findFirst();
     }
 
-    private static Stream<Path> getAllFilesInDirectory(Path directory) {
-        try {
-            return Files.walk(directory)
-                    .filter(Files::isRegularFile);
+    private static List<Path> getAllFilesInDirectory(Path directory) {
+        try (Stream<Path> paths = Files.walk(directory)) {
+            return paths.filter(Files::isRegularFile).toList();
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new ModuleSizeCalculatorException("Error occur on scanning project in `%s` directory.".formatted(directory.toAbsolutePath()), ex);
         }
     }
 
@@ -100,7 +99,7 @@ public class ModuleSizeCalculator {
             }
             return lineCount;
         } catch (IOException ex) {
-            throw new RuntimeException("Error occur on counting lines in `%s`".formatted(filePath), ex);
+            throw new ModuleSizeCalculatorException("Error occur on counting lines of `%s` file.".formatted(filePath), ex);
         }
     }
 
