@@ -1,5 +1,7 @@
 package pl.tfij.test.modulesize;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,10 +12,18 @@ import java.util.stream.Collectors;
 public class ProjectSummary {
     private final ArrayList<String> definedModules;
     private final Map<String, ModulePartialSummary> analyzedModules;
+    private final DecimalFormat decimalFormat;
 
     ProjectSummary(ArrayList<String> modules, Map<String, ModulePartialSummary> analyzedModules) {
         definedModules = modules;
         this.analyzedModules = analyzedModules;
+        decimalFormat = numberFormatter();
+    }
+
+    private DecimalFormat numberFormatter() {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        return new DecimalFormat("#.####", symbols);
     }
 
     /**
@@ -39,15 +49,17 @@ public class ProjectSummary {
      * @throws AssertionError           if any module's relative size exceeds the threshold.
      */
     public ProjectSummary verifyEachModuleRelativeSizeIsSmallerThan(double threshold) {
-        if (threshold <= 0 || threshold > 1) {
-            throw new IllegalArgumentException("Threshold must be positive number in range (0, 1]. Given value is %s.".formatted(threshold));
-        }
+        verifyRelativeSizeThreshold(threshold);
         Comparator<ModulePartialSummary> comparing = Comparator.comparing(ModulePartialSummary::relativeModuleSize);
         Optional<ModulePartialSummary> biggestModule = analyzedModules.values().stream().max(comparing);
         biggestModule.ifPresent(module -> {
             if (module.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max allowed size is %.3f."
-                        .formatted(module.module(), module.relativeModuleSize(), threshold));
+                throw new AssertionError("Module `%s` relative size is %s. Max allowed size is %s."
+                        .formatted(
+                                module.module(),
+                                decimalFormat.format(module.relativeModuleSize()),
+                                decimalFormat.format(threshold)
+                        ));
             }
         });
         return this;
@@ -60,33 +72,50 @@ public class ProjectSummary {
      * @param threshold The maximum relative size allowed for the module.
      * @return The ProjectSummary instance to allow method chaining.
      * @throws IllegalArgumentException if the specified module is not defined.
+     * @throws IllegalArgumentException if the threshold is not within the valid range.
      * @throws AssertionError           if the relative size of the module exceeds the threshold.
      */
-    public ProjectSummary verifyModuleIsSmallerThan(String module, double threshold) {
+    public ProjectSummary verifyModuleRelativeSizeIsSmallerThan(String module, double threshold) {
         if (!definedModules.contains(module)) {
             throw new IllegalArgumentException("Module `%s` was not defined.".formatted(module));
         }
-        Optional.ofNullable(analyzedModules.get(module)).ifPresent(it -> {
-            if (it.relativeModuleSize() > threshold) {
-                throw new AssertionError("Module `%s` relative size is %.3f. Max allowed size is %.3f."
-                        .formatted(it.module(), it.relativeModuleSize(), threshold));
+        verifyRelativeSizeThreshold(threshold);
+        Optional.ofNullable(analyzedModules.get(module)).ifPresent(moduleSummary -> {
+            if (moduleSummary.relativeModuleSize() > threshold) {
+                throw new AssertionError("Module `%s` relative size is %s. Max allowed size is %s."
+                        .formatted(
+                                moduleSummary.module(),
+                                decimalFormat.format(moduleSummary.relativeModuleSize()),
+                                decimalFormat.format(threshold)
+                        ));
             }
         });
         return this;
     }
 
+    private void verifyRelativeSizeThreshold(double threshold) {
+        if (threshold <= 0 || threshold > 1) {
+            throw new IllegalArgumentException("Threshold must be positive number in range (0, 1]. Given value is %s."
+                    .formatted(decimalFormat.format(threshold)));
+        }
+    }
+
     /**
-     * Verifies that the number of files in the undefined module is smaller than the specified threshold.
+     * Verifies that the number of files in the undefined module is smaller than the specified allowedFileCount.
      *
-     * @param threshold The maximum number of files allowed in the undefined module.
+     * @param allowedFileCount The maximum number of files allowed in the undefined module. Value must be positive or zero int number.
      * @return The ProjectSummary instance to allow method chaining.
-     * @throws AssertionError if the number of files in the undefined module exceeds the threshold.
+     * @throws IllegalArgumentException if the given allowedFileCount has invalid value.
+     * @throws AssertionError           if the number of files in the undefined module exceeds the allowedFileCount.
      */
-    public ProjectSummary verifyUndefinedModuleNumberOfFilesIsSmallerThan(int threshold) {
+    public ProjectSummary verifyUndefinedModuleNumberOfFilesIsSmallerThan(int allowedFileCount) {
+        if (allowedFileCount < 0) {
+            throw new IllegalArgumentException("allowedFileCount must be positive number or zero. Give value is %s.".formatted(allowedFileCount));
+        }
         Optional.ofNullable(analyzedModules.get(ModuleSizeCalculator.UNDEFINED_MODULE_NAME)).ifPresent(it -> {
-            if (it.numberOfFiles() > threshold) {
+            if (it.numberOfFiles() > allowedFileCount) {
                 throw new AssertionError("Number of files in undefined module is %s. Max allowed count is %s."
-                        .formatted(it.numberOfFiles(), threshold));
+                        .formatted(it.numberOfFiles(), allowedFileCount));
             }
         });
         return this;
