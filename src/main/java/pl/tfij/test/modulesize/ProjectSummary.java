@@ -1,5 +1,9 @@
 package pl.tfij.test.modulesize;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -126,12 +130,34 @@ public class ProjectSummary {
      *
      * @return A string representing the Mermaid pie chart.
      */
-    public String toMermaidPieChart() {
-        String pieChartHeader = "pie showData title Modules size\n";
+    public String createMermaidPieChart() {
+        String pieChartHeader = "pie showData title Modules size (Total LOC: %d)\n".formatted(linesOfCode());
         String pieChartData = analyzedModules.values().stream()
+                .sorted(Comparator.comparing(ModulePartialSummary::module))
                 .map(it -> "    \"%s\" : %s".formatted(it.module(), it.moduleLinesOfCode()))
                 .collect(Collectors.joining("\n"));
         return pieChartHeader + pieChartData;
+    }
+
+    /**
+     * Saves the Mermaid pie chart representation of the project summary to the specified target path.
+     *
+     * @param target the path where the Mermaid pie chart will be saved.
+     * @return The ProjectSummary instance to allow method chaining.
+     * @throws ModuleSizeCalculatorException if an I/O error occurs while saving the Mermaid chart
+     * @throws IllegalArgumentException      if the target path is null
+     */
+    public ProjectSummary saveMermaidPieChart(Path target) {
+        if (target == null) {
+            throw new IllegalArgumentException("The target argument must be not null.");
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(target.toFile()));) {
+            String mermaidPieChart = createMermaidPieChart();
+            writer.write(mermaidPieChart);
+            return this;
+        } catch (IOException ex) {
+            throw new ModuleSizeCalculatorException("IO error occur on saving mermaid chart to %s.".formatted(target.toAbsolutePath()), ex);
+        }
     }
 
     /**
