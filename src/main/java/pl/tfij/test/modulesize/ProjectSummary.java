@@ -6,19 +6,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static pl.tfij.test.modulesize.FileInModule.Module.UNDEFINED_MODULE;
+
 public class ProjectSummary {
-    private final ArrayList<String> definedModules;
-    private final Map<String, ModulePartialSummary> analyzedModules;
+    private final List<FileInModule.Module> definedModules;
+    private final Map<FileInModule.Module, ModulePartialSummary> analyzedModules;
     private final DecimalFormat decimalFormat;
 
-    ProjectSummary(ArrayList<String> modules, Map<String, ModulePartialSummary> analyzedModules) {
+    ProjectSummary(List<FileInModule.Module> modules, Map<FileInModule.Module, ModulePartialSummary> analyzedModules) {
         definedModules = modules;
         this.analyzedModules = analyzedModules;
         decimalFormat = numberFormatter();
@@ -37,31 +39,31 @@ public class ProjectSummary {
      * @throws AssertionError When any of the modules is empty.
      */
     public ProjectSummary verifyNoEmptyModules() {
-        Optional<String> emptyModule = definedModules.stream().filter(it -> !analyzedModules.containsKey(it)).findFirst();
+        Optional<FileInModule.Module> emptyModule = definedModules.stream().filter(it -> !analyzedModules.containsKey(it)).findFirst();
         emptyModule.ifPresent(module -> {
-            throw new AssertionError("Module `%s` is empty.".formatted(module));
+            throw new AssertionError("Module `%s` is empty.".formatted(module.name()));
         });
         return this;
     }
 
     /**
-     * Verifies that the relative size of each module is smaller than the given threshold.
+     * Verifies that the relative size of each moduleName is smaller than the given threshold.
      *
-     * @param threshold The maximum relative size allowed for each module. Must be a positive number in the range (0, 1].
+     * @param threshold The maximum relative size allowed for each moduleName. Must be a positive number in the range (0, 1].
      * @return The ProjectSummary instance to allow method chaining.
      * @throws IllegalArgumentException if the threshold is not within the valid range.
-     * @throws AssertionError           if any module's relative size exceeds the threshold.
+     * @throws AssertionError           if any moduleName's relative size exceeds the threshold.
      */
     public ProjectSummary verifyEachModuleRelativeSizeIsSmallerThan(double threshold) {
         verifyRelativeSizeThreshold(threshold);
         Comparator<ModulePartialSummary> comparing = Comparator.comparing(ModulePartialSummary::relativeModuleSize);
         Optional<ModulePartialSummary> biggestModule = analyzedModules.values().stream().max(comparing);
-        biggestModule.ifPresent(module -> {
-            if (module.relativeModuleSize() > threshold) {
+        biggestModule.ifPresent(summary -> {
+            if (summary.relativeModuleSize() > threshold) {
                 throw new AssertionError("Module `%s` relative size is %s. Max allowed size is %s."
                         .formatted(
-                                module.module(),
-                                decimalFormat.format(module.relativeModuleSize()),
+                                summary.module().name(),
+                                decimalFormat.format(summary.relativeModuleSize()),
                                 decimalFormat.format(threshold)
                         ));
             }
@@ -70,25 +72,26 @@ public class ProjectSummary {
     }
 
     /**
-     * Verifies that the relative size of the specified module is smaller than the given threshold.
+     * Verifies that the relative size of the specified moduleName is smaller than the given threshold.
      *
-     * @param module    The name of the module to verify.
-     * @param threshold The maximum relative size allowed for the module.
+     * @param module    The name of the moduleName to verify.
+     * @param threshold The maximum relative size allowed for the moduleName.
      * @return The ProjectSummary instance to allow method chaining.
-     * @throws IllegalArgumentException if the specified module is not defined.
+     * @throws IllegalArgumentException if the specified moduleName is not defined.
      * @throws IllegalArgumentException if the threshold is not within the valid range.
-     * @throws AssertionError           if the relative size of the module exceeds the threshold.
+     * @throws AssertionError           if the relative size of the moduleName exceeds the threshold.
      */
     public ProjectSummary verifyModuleRelativeSizeIsSmallerThan(String module, double threshold) {
-        if (!definedModules.contains(module)) {
+        Optional<FileInModule.Module> definedModule = definedModules.stream().filter(it -> Objects.equals(it.name(), module)).findFirst();
+        if (definedModule.isEmpty()) {
             throw new IllegalArgumentException("Module `%s` was not defined.".formatted(module));
         }
         verifyRelativeSizeThreshold(threshold);
-        Optional.ofNullable(analyzedModules.get(module)).ifPresent(moduleSummary -> {
+        Optional.ofNullable(analyzedModules.get(definedModule.get())).ifPresent(moduleSummary -> {
             if (moduleSummary.relativeModuleSize() > threshold) {
                 throw new AssertionError("Module `%s` relative size is %s. Max allowed size is %s."
                         .formatted(
-                                moduleSummary.module(),
+                                moduleSummary.module().name(),
                                 decimalFormat.format(moduleSummary.relativeModuleSize()),
                                 decimalFormat.format(threshold)
                         ));
@@ -105,20 +108,20 @@ public class ProjectSummary {
     }
 
     /**
-     * Verifies that the number of files in the undefined module is smaller than the specified allowedFileCount.
+     * Verifies that the number of files in the undefined moduleName is smaller than the specified allowedFileCount.
      *
-     * @param allowedFileCount The maximum number of files allowed in the undefined module. Value must be positive or zero int number.
+     * @param allowedFileCount The maximum number of files allowed in the undefined moduleName. Value must be positive or zero int number.
      * @return The ProjectSummary instance to allow method chaining.
      * @throws IllegalArgumentException if the given allowedFileCount has invalid value.
-     * @throws AssertionError           if the number of files in the undefined module exceeds the allowedFileCount.
+     * @throws AssertionError           if the number of files in the undefined moduleName exceeds the allowedFileCount.
      */
     public ProjectSummary verifyUndefinedModuleNumberOfFilesIsSmallerThan(int allowedFileCount) {
         if (allowedFileCount < 0) {
             throw new IllegalArgumentException("allowedFileCount must be positive number or zero. Give value is %s.".formatted(allowedFileCount));
         }
-        Optional.ofNullable(analyzedModules.get(ModuleSizeCalculator.UNDEFINED_MODULE_NAME)).ifPresent(it -> {
+        Optional.ofNullable(analyzedModules.get(UNDEFINED_MODULE)).ifPresent(it -> {
             if (it.numberOfFiles() > allowedFileCount) {
-                throw new AssertionError("Number of files in undefined module is %s. Max allowed count is %s."
+                throw new AssertionError("Number of files in undefined moduleName is %s. Max allowed count is %s."
                         .formatted(it.numberOfFiles(), allowedFileCount));
             }
         });
@@ -133,8 +136,8 @@ public class ProjectSummary {
     public String createMermaidPieChart() {
         String pieChartHeader = "pie showData title Modules size (Total LOC: %d)\n".formatted(linesOfCode());
         String pieChartData = analyzedModules.values().stream()
-                .sorted(Comparator.comparing(ModulePartialSummary::module))
-                .map(it -> "    \"%s\" : %s".formatted(it.module(), it.moduleLinesOfCode()))
+                .sorted(Comparator.comparing(it -> it.module().name()))
+                .map(it -> "    \"%s\" : %s".formatted(it.module().name(), it.moduleLinesOfCode()))
                 .collect(Collectors.joining("\n"));
         return pieChartHeader + pieChartData;
     }
@@ -163,11 +166,11 @@ public class ProjectSummary {
     /**
      * Generates a summary of the analyzed modules.
      *
-     * @return A list containing ModuleSummary objects representing each analyzed module.
+     * @return A list containing ModuleSummary objects representing each analyzed moduleName.
      */
     public List<ModuleSummary> modulesSummary() {
         return analyzedModules.values().stream()
-                .map(it -> new ModuleSummary(it.module(), it.numberOfFiles(), it.moduleLinesOfCode(), it.relativeModuleSize()))
+                .map(it -> new ModuleSummary(it.module().name(), it.numberOfFiles(), it.moduleLinesOfCode(), it.relativeModuleSize()))
                 .toList();
     }
 
@@ -186,11 +189,11 @@ public class ProjectSummary {
     }
 
     /**
-     * @param module the name of the analyzed module
-     * @param numberOfFiles number of files in the module
-     * @param linesOfCode total number of lines of code in the module
-     * @param relativeSize relative size of the module. It is a number in the range of 0-1.
-     *        One represents 100%, indicating that all the code of the project is in this module.
+     * @param moduleName the name of the analyzed moduleName
+     * @param numberOfFiles number of files in the moduleName
+     * @param linesOfCode total number of lines of code in the moduleName
+     * @param relativeSize relative size of the moduleName. It is a number in the range of 0-1.
+     *        One represents 100%, indicating that all the code of the project is in this moduleName.
      */
-    public record ModuleSummary(String module, int numberOfFiles, int linesOfCode, double relativeSize) { }
+    public record ModuleSummary(String moduleName, int numberOfFiles, int linesOfCode, double relativeSize) { }
 }

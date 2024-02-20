@@ -5,6 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static pl.tfij.test.modulesize.ProjectSummary.*;
 
 class ModuleSizeCalculatorTest {
 
@@ -91,6 +95,21 @@ class ModuleSizeCalculatorTest {
 
         String expectedMessageRegex = "Error occur on scanning project in `.*[\\/\\\\]src[\\/\\\\]test[\\/\\\\]resources[\\/\\\\]not-existing-project` directory\\.";
         Assertions.assertTrue(moduleSizeCalculatorException.getMessage().matches(expectedMessageRegex));
+    }
+
+    @Test
+    @DisplayName("Should analyze project with dirs as modules")
+    void shouldAnalyzeDirModules() {
+        ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources")
+                .withDirModule("test-project/pl/tfij/commons")
+                .withDirModule("other-test-project")
+                .analyze();
+
+        Assertions.assertEquals(
+                Set.of("other-test-project", "test-project/pl/tfij/commons", "undefined"),
+                projectSummary.modulesSummary().stream().map(ModuleSummary::moduleName).collect(Collectors.toSet()));
+        Assertions.assertEquals(26, projectSummary.numberOfFiles());
+        Assertions.assertEquals(1099, projectSummary.linesOfCode());
     }
 
 }

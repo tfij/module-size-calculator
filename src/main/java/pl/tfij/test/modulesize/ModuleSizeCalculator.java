@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ModuleSizeCalculator {
-    public static final String UNDEFINED_MODULE_NAME = "undefined";
     private final List<FileInModule.Module> modules;
     private final String rootDir;
 
@@ -26,11 +25,9 @@ public class ModuleSizeCalculator {
      */
     private final Set<String> includeOnlyFilesWithExtension;
 
-    ModuleSizeCalculator(List<String> modules, String rootDir, Set<String> includeOnlyFilesWithExtension) {
+    ModuleSizeCalculator(List<FileInModule.Module> modules, String rootDir, Set<String> includeOnlyFilesWithExtension) {
         this.includeOnlyFilesWithExtension = includeOnlyFilesWithExtension;
-        this.modules = modules.stream()
-                .map(it -> new FileInModule.Module(it, rootDir + "/" + it.replaceAll("\\.", "/")))
-                .toList();
+        this.modules = modules;
         this.rootDir = rootDir;
     }
 
@@ -44,7 +41,7 @@ public class ModuleSizeCalculator {
         return new ModuleSizeCalculatorBuilder(rootDir);
     }
 
-    private Map<String, ModulePartialSummary> calculate() {
+    private Map<FileInModule.Module, ModulePartialSummary> calculate() {
         List<FileInModule> pathStream = getAllFilesInDirectory(Paths.get(rootDir)).stream()
                 .filter(this::includeFile)
                 .map(it -> new FileInModule(
@@ -78,7 +75,19 @@ public class ModuleSizeCalculator {
     }
 
     private Optional<FileInModule.Module> matchModule(Path file, List<FileInModule.Module> modules) {
-        return modules.stream().filter(moduleDir -> file.startsWith(moduleDir.moduleDir())).findFirst();
+        return modules.stream()
+                .flatMap(it -> it.definedModule().stream())
+                .filter(module -> isSubpath(file, module.moduleDir()))
+                .<FileInModule.Module>map(it -> it)
+                .findFirst();
+    }
+
+    private static boolean isSubpath(Path path1, Path path2) {
+        if (path1.getNameCount() < path2.getNameCount()) {
+            return false;
+        }
+        Path subpath = path1.subpath(0, path2.getNameCount());
+        return subpath.equals(path2);
     }
 
     private static List<Path> getAllFilesInDirectory(Path directory) {
@@ -105,7 +114,7 @@ public class ModuleSizeCalculator {
 
     public static class ModuleSizeCalculatorBuilder {
         private final String rootDir;
-        private final ArrayList<String> modules = new ArrayList<>();
+        private final List<FileInModule.Module> modules = new ArrayList<>();
         private final Set<String> includeOnlyFilesWithExtension = new HashSet<>();
 
         ModuleSizeCalculatorBuilder(String rootDir) {
@@ -113,13 +122,25 @@ public class ModuleSizeCalculator {
         }
 
         /**
-         * Adds a module package to the list of modules for analysis.
+         * Adds a moduleName package to the list of modules for analysis.
          *
-         * @param modulePackage The package of the module to be added.
+         * @param modulePackage The package of the moduleName to be added.
          * @return The ModuleSizeCalculatorBuilder instance to allow method chaining.
          */
         public ModuleSizeCalculatorBuilder withModule(String modulePackage) {
-            modules.add(modulePackage);
+            FileInModule.Module module = new FileInModule.DefinedModule(modulePackage, Paths.get(rootDir + "/" + modulePackage.replaceAll("\\.", "/")));
+            modules.add(module);
+            return this;
+        }
+
+        /**
+         * Adds a directory module to the list of modules for analysis.
+         *
+         * @param path The path of the directory module to be added.
+         * @return The ModuleSizeCalculatorBuilder instance to allow method chaining.
+         */
+        public ModuleSizeCalculatorBuilder withDirModule(String path) {
+            modules.add(new FileInModule.DefinedModule(path, Paths.get(rootDir + "/" + path)));
             return this;
         }
 
@@ -143,7 +164,7 @@ public class ModuleSizeCalculator {
          */
         public ProjectSummary analyze() {
             ModuleSizeCalculator moduleSizeCalculator = new ModuleSizeCalculator(modules, rootDir, includeOnlyFilesWithExtension);
-            Map<String, ModulePartialSummary> analyzedModules = moduleSizeCalculator.calculate();
+            Map<FileInModule.Module, ModulePartialSummary> analyzedModules = moduleSizeCalculator.calculate();
             return new ProjectSummary(modules, analyzedModules);
         }
     }
