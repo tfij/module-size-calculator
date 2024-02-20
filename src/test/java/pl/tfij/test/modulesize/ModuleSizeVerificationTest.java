@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class ModuleSizeVerificationTest {
 
     @Test
-    @DisplayName("Should not throw AssertionError when call verifyNoEmptyModules() and no module is empty")
+    @DisplayName("Should not throw AssertionError when call verifyNoEmptyModules() and no moduleName is empty")
     void noErrorForVerifyNoEmptyModules() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -25,7 +25,7 @@ public class ModuleSizeVerificationTest {
     }
 
     @Test
-    @DisplayName("Should throw AssertionError when call verifyNoEmptyModules() and a module is empty")
+    @DisplayName("Should throw AssertionError when call verifyNoEmptyModules() and a moduleName is empty")
     void assertionErrorForVerifyNoEmptyModules() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -33,7 +33,7 @@ public class ModuleSizeVerificationTest {
                 .withModule("pl.tfij.payments")
                 .withModule("pl.tfij.products")
                 .withModule("pl.tfij.shipping")
-                .withModule("pl.tfij.notification") // empty module
+                .withModule("pl.tfij.notification") // empty moduleName
                 .withModule("pl.tfij.users")
                 .analyze();
 
@@ -43,7 +43,7 @@ public class ModuleSizeVerificationTest {
 
     @ParameterizedTest
     @ValueSource(doubles = {0.5, 0.7, 1.0})
-    @DisplayName("Should not throw AssertionError when call verifyEachModuleRelativeSizeIsSmallerThan() and a module size is smaller then limit")
+    @DisplayName("Should not throw AssertionError when call verifyEachModuleRelativeSizeIsSmallerThan() and a moduleName size is smaller then limit")
     void noErrorForVerifyEachModuleRelativeSizeIsSmallerThan(double threshold) {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -58,7 +58,7 @@ public class ModuleSizeVerificationTest {
     }
 
     @Test
-    @DisplayName("Should throw AssertionError when call verifyEachModuleRelativeSizeIsSmallerThan() and a module size is grater then limit")
+    @DisplayName("Should throw AssertionError when call verifyEachModuleRelativeSizeIsSmallerThan() and a moduleName size is grater then limit")
     void assertionErrorForVerifyEachModuleRelativeSizeIsSmallerThan() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -104,7 +104,7 @@ public class ModuleSizeVerificationTest {
             pl.tfij.shipping     | 0.1
             pl.tfij.users        | 0.1
             """, delimiter = '|')
-    @DisplayName("Should not throw AssertionError when call verifyModuleRelativeSizeIsSmallerThan() and a module size is smaller then limit")
+    @DisplayName("Should not throw AssertionError when call verifyModuleRelativeSizeIsSmallerThan() and a moduleName size is smaller then limit")
     void noErrorForVerifyModuleRelativeSizeIsSmallerThan(String module, double threshold) {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -127,7 +127,7 @@ public class ModuleSizeVerificationTest {
             pl.tfij.shipping     | 0.05 | Module `pl.tfij.shipping` relative size is 0.0506. Max allowed size is 0.05.
             pl.tfij.users        | 0.05 | Module `pl.tfij.users` relative size is 0.0885. Max allowed size is 0.05.
             """, delimiter = '|')
-    @DisplayName("Should throw AssertionError when call verifyModuleRelativeSizeIsSmallerThan() and a module size is grater then limit")
+    @DisplayName("Should throw AssertionError when call verifyModuleRelativeSizeIsSmallerThan() and a moduleName size is grater then limit")
     void assertionErrorForVerifyModuleRelativeSizeIsSmallerThan(String module, double threshold, String expectedMessage) {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -143,7 +143,7 @@ public class ModuleSizeVerificationTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when call verifyModuleRelativeSizeIsSmallerThan() with not defined module")
+    @DisplayName("Should throw IllegalArgumentException when call verifyModuleRelativeSizeIsSmallerThan() with not defined moduleName")
     void argumentExceptionForVerifyModuleRelativeSizeIsSmallerThan() {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -157,8 +157,8 @@ public class ModuleSizeVerificationTest {
 
         IllegalArgumentException error = Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> projectSummary.verifyModuleRelativeSizeIsSmallerThan("pl.tfij.not-defined-module", 0.5));
-        Assertions.assertEquals("Module `pl.tfij.not-defined-module` was not defined.", error.getMessage());
+                () -> projectSummary.verifyModuleRelativeSizeIsSmallerThan("pl.tfij.not-defined-moduleName", 0.5));
+        Assertions.assertEquals("Module `pl.tfij.not-defined-moduleName` was not defined.", error.getMessage());
     }
 
     @ParameterizedTest
@@ -187,7 +187,7 @@ public class ModuleSizeVerificationTest {
 
     @ParameterizedTest
     @ValueSource(ints = {5, 6, 100})
-    @DisplayName("Should not throw AssertionError when call verifyUndefinedModuleNumberOfFilesIsSmallerThan() and a module size is smaller then limit")
+    @DisplayName("Should not throw AssertionError when call verifyUndefinedModuleNumberOfFilesIsSmallerThan() and a moduleName size is smaller then limit")
     void noErrorForVerifyUndefinedModuleNumberOfFilesIsSmallerThan(int fileCount) {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
@@ -202,11 +202,11 @@ public class ModuleSizeVerificationTest {
 
     @ParameterizedTest
     @CsvSource(textBlock = """
-            0 | Number of files in undefined module is 5. Max allowed count is 0.
-            1 | Number of files in undefined module is 5. Max allowed count is 1.
-            4 | Number of files in undefined module is 5. Max allowed count is 4.
+            0 | Number of files in undefined moduleName is 5. Max allowed count is 0.
+            1 | Number of files in undefined moduleName is 5. Max allowed count is 1.
+            4 | Number of files in undefined moduleName is 5. Max allowed count is 4.
             """, delimiter = '|')
-    @DisplayName("Should throw AssertionError when call verifyUndefinedModuleNumberOfFilesIsSmallerThan() and file count of unnamed module is grater then limit")
+    @DisplayName("Should throw AssertionError when call verifyUndefinedModuleNumberOfFilesIsSmallerThan() and file count of unnamed moduleName is grater then limit")
     void assertionErrorForVerifyUndefinedModuleNumberOfFilesIsSmallerThan(int allowedFileCount, String expectedMessage) {
         ProjectSummary projectSummary = ModuleSizeCalculator.project("src/test/resources/test-project")
                 .withModule("pl.tfij.commons")
