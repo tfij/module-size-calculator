@@ -15,6 +15,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The ModuleSizeCalculator class calculates the size of modules in a project.
+ * It provides methods to configure and analyze modules based on their packages or directories.
+ * <p>
+ * This class uses the ModuleSizeCalculatorBuilder inner class to provide a fluent API for configuring modules.
+ * </p>
+ */
 public class ModuleSizeCalculator {
     private final List<FileInModule.Module> modules;
     private final String rootDir;
@@ -112,6 +119,13 @@ public class ModuleSizeCalculator {
         }
     }
 
+    /**
+     * The ModuleSizeCalculatorBuilder class provides a fluent API for configuring modules and analyzing projects.
+     * It allows users to specify modules, include file extensions, and analyze the project.
+     * <p>
+     * This class is typically used in conjunction with the ModuleSizeCalculator class to configure and perform analysis.
+     * </p>
+     */
     public static class ModuleSizeCalculatorBuilder {
         private final String rootDir;
         private final List<FileInModule.Module> modules = new ArrayList<>();
