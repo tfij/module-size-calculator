@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 import static pl.tfij.test.modulesize.FileInModule.Module.UNDEFINED_MODULE;
 
+/**
+ * The ProjectSummary class provides methods for analyzing and summarizing project modules.
+ * It allows to verify module sizes, generate Mermaid pie charts, save charts to files, and retrieve module summaries.
+ */
 public class ProjectSummary {
     private final List<FileInModule.Module> definedModules;
     private final Map<FileInModule.Module, ModulePartialSummary> analyzedModules;
