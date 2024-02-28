@@ -17,6 +17,27 @@ This definition is flexible and allows the library to be used in most standard p
 
 ## Usage
 
+### Sample jUnit test
+
+Below is an example jUnit test verifying the size of modules using the library:
+
+```java
+@Test
+void shouldVerifyModulesSize() {
+    ProjectSummary projectSummary = ModuleSizeCalculator.project("src/main/java")
+            .withModule("com.example.module1")
+            .withModule("com.example.module2")
+            .withModule("com.example.module3")
+            .withModule("com.example.commons")
+            .analyze()
+            .verifyEachModuleRelativeSizeIsSmallerThan(0.3)
+            .verifyModuleRelativeSizeIsSmallerThan("com.example.commons", 0.1)
+            .verifyNoEmptyModules()
+            .verifyUndefinedModuleNumberOfFilesIsSmallerThan(1)
+            .saveMermaidPieChart(Path.of("target/modules-size.mermaid"));
+}
+```
+
 ### Analyzing Project Modules
 
 To analyze project modules, use the `ModuleSizeCalculator` class.
@@ -90,7 +111,7 @@ projectSummary.verifyUndefinedModuleNumberOfFilesIsSmallerThan(1);
 You can generate [Mermaid pie charts](https://mermaid.js.org/syntax/pie.html) to visualize module sizes using the saveMermaidPieChart() method.
 
 ```java
-String mermaidPieChart = projectSummary.saveMermaidPieChart(Path.of("target/modules-size.mermaid"));
+projectSummary.saveMermaidPieChart(Path.of("target/modules-size.mermaid"));
 ```
 
 ## Installation
