@@ -124,13 +124,14 @@ Add the following dependency to your pom.xml file for Maven:
     <groupId>pl.tfij</groupId>
     <artifactId>module-size-calculator</artifactId>
     <version>1.0.0</version>
+    <scope>test</scope>
 </dependency>
 ```
 
 For Gradle, add the following to your build.gradle file:
 
 ```groovy
-implementation 'pl.tfij:module-size-calculator:1.0.0'
+testImplementation 'pl.tfij:module-size-calculator:1.0.0'
 ```
 
 ## Contributions
