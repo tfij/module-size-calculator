@@ -6,7 +6,7 @@ plugins {
     // release
     `maven-publish`
     signing
-    id("pl.allegro.tech.build.axion-release") version "1.18.2"
+    id("pl.allegro.tech.build.axion-release") version "1.18.3"
 }
 
 group = "pl.tfij"
