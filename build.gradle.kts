@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.11.0"))
+    testImplementation(platform("org.junit:junit-bom:5.11.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     checkstyle("pl.tfij:check-tfij-style:1.5.1")
 }
