@@ -17,9 +17,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    checkstyle("pl.tfij:check-tfij-style:1.5.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    checkstyle("pl.tfij:check-tfij-style:2.0.1")
 }
 
 tasks.test {
@@ -28,8 +29,14 @@ tasks.test {
 
 // checkstyle
 checkstyle {
-    toolVersion = "10.13.0"
-    sourceSets = listOf(project.sourceSets.main.orNull)
+    toolVersion = "13.4.2"
+    sourceSets = listOf(project.sourceSets.main.get())
+}
+
+tasks.withType<Checkstyle>().configureEach {
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    })
 }
 
 // jacoco test coverage
@@ -49,6 +56,9 @@ tasks.jacocoTestReport {
 
 // release
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
     withJavadocJar()
     withSourcesJar()
 }
@@ -97,8 +107,8 @@ publishing {
     }
     repositories {
         maven {
-            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            val releasesRepoUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
             url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
             credentials {
                 username = System.getenv("SONATYPE_USERNAME")
