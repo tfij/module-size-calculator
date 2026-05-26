@@ -14,19 +14,68 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: gradle/wrapper-validation-action@v3
-      - name: Set up JDK 11
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: gradle/actions/wrapper-validation@v6
+      - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
+      - name: Prepare Gradle wrapper
+        run: ./gradlew --version > /dev/null
+      - name: Verify axion release version
+        run: |
+          version="$(./gradlew currentVersion --quiet -Prelease.quiet | grep -E '^[0-9]+[.][0-9]+[.][0-9]+(-[^[:space:]]+)?$' | tail -n 1)"
+          tag_version="${RELEASE_TAG#v}"
+          if [ -z "$version" ]; then
+            echo "Could not read axion release version."
+            exit 1
+          fi
+          if [ "$version" != "$tag_version" ]; then
+            echo "Axion version '$version' does not match release tag '$RELEASE_TAG'."
+            exit 1
+          fi
+          if [[ "$version" == *SNAPSHOT ]]; then
+            echo "Refusing to publish snapshot version '$version'."
+            exit 1
+          fi
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+      - name: Verify Sonatype credentials
+        run: |
+          if [ -z "${SONATYPE_USERNAME:-}" ] || [ -z "${SONATYPE_PASSWORD:-}" ]; then
+            echo "SONATYPE_USERNAME or SONATYPE_PASSWORD GitHub secret is missing."
+            exit 1
+          fi
+          token="$(printf '%s:%s' "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" | base64 | tr -d '\n')"
+          curl --fail --show-error --silent \
+            --header "Authorization: Bearer ${token}" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any" \
+            > /dev/null
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       - name: Publish to maven central
-        run: gradle publishSonatypePublicationToMavenRepository
+        run: ./gradlew publishSonatypePublicationToMavenRepository
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SIGNING_GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
           SIGNING_GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           SIGNING_GPG_PRIVATE_KEY_PASSWORD: ${{ secrets.GPG_PRIVATE_KEY_PASSWORD }}
+      - name: Upload deployment to Central Portal
+        run: |
+          token="$(printf '%s:%s' "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" | base64 | tr -d '\n')"
+          curl --fail --show-error --silent \
+            --request POST \
+            --header "Authorization: Bearer ${token}" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/pl.tfij?publishing_type=automatic"
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
