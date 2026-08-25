@@ -54,7 +54,7 @@ ProjectSummary projectSummary = ModuleSizeCalculator.project("src/main/java")
 
 ### Verifying Module Sizes
 
-The library allows to perform various verifications on the module sizes
+The library allows you to perform various verifications on the module sizes
 
 #### Verifying Relative Size of Each Module
 
@@ -69,7 +69,7 @@ projectSummary.verifyEachModuleRelativeSizeIsSmallerThan(0.3);
 #### Verifying Relative Size of a Specific Module
 
 Verify if the relative size of a specific module is smaller than a specified threshold (relative to the total project size).
-An example use would be to ensure that a specific module, e.g. commons, is small.
+An example use would be to ensure that a specific module, e.g., commons, is small.
 
 ```java
 projectSummary.verifyModuleRelativeSizeIsSmallerThan("com.example.commons", 0.1);
@@ -94,8 +94,8 @@ An example of such a file could be a class with a `main()` method that is in the
   \ example
     | module1
     | module2
-    | module2
-    \ Main.java
+    | module3
+    \ main.java
 ```
 
 The method can also catch situations when a new module is added to the project which is not added to the module definitions in the test.
