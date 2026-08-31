@@ -20,7 +20,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    checkstyle("pl.tfij:check-tfij-style:2.0.1")
+    checkstyle("pl.tfij:check-tfij-style:2.0.2")
 }
 
 tasks.test {
